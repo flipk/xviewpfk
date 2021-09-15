@@ -374,9 +374,9 @@ typedef struct { pixval r, g, b; } pixel;
 
 #define PPM_DEPTH(newp,p,oldmaxval,newmaxval) \
     PPM_ASSIGN( (newp), \
-	        (int) PPM_GETR(p) * (newmaxval) / ((int)oldmaxval), \
-	        (int) PPM_GETG(p) * (newmaxval) / ((int)oldmaxval), \
-	        (int) PPM_GETB(p) * (newmaxval) / ((int)oldmaxval) )
+	        ((int) PPM_GETR(p)) * ((int)newmaxval) / ((int)oldmaxval), \
+	        ((int) PPM_GETG(p)) * ((int)newmaxval) / ((int)oldmaxval), \
+	        ((int) PPM_GETB(p)) * ((int)newmaxval) / ((int)oldmaxval) )
 
 
 /* Luminance macro. */

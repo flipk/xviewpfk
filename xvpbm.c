@@ -353,7 +353,7 @@ static int getint(fp, pinfo)
       *sp++ = '\n';
       *sp   = '\0';
 
-      if (strlen(cmt) > 0) {    /* add to pinfo->comment */
+      if (strlen(cmt) > (size_t) 0) {    /* add to pinfo->comment */
 	if (!pinfo->comment) {
 	  pinfo->comment = (char *) malloc(strlen(cmt)+1);
 	  if (!pinfo->comment) FatalError("malloc failure in xvpbm.c getint");
@@ -438,7 +438,7 @@ static int getbit(fp, pinfo)
       *sp++ = '\n';
       *sp = '\0';
 
-      if (strlen(cmt) > 0) {    /* add to pinfo->comment */
+      if (strlen(cmt) > (size_t) 0) {    /* add to pinfo->comment */
 	if (!pinfo->comment) {
 	  pinfo->comment = (char *) malloc(strlen(cmt)+1);
 	  if (!pinfo->comment) FatalError("malloc failure in xvpbm.c getint");

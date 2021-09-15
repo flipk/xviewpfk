@@ -150,11 +150,15 @@ void CenterMapWindow(win, dx, dy, w, h)
     if (wy + h > dispHIGH) wy = dispHIGH - h;
   }
 
-  /* wx -= (p_offx + ch_offx);
-     wy -= (p_offy + ch_offy); */
-
-  wx -= (ch_offx);
-  wy -= (ch_offy);
+  
+  if (winCtrPosKludge) {
+    wx -= (p_offx + ch_offx);
+    wy -= (p_offy + ch_offy);
+  } 
+  else {
+    wx -= (ch_offx);
+    wy -= (ch_offy);
+  }
 
   if (!XGetNormalHints(theDisp, win, &hints)) hints.flags = 0;
   hints.width  = hints.min_width  = hints.max_width  = w;
@@ -249,7 +253,7 @@ static int doPopUp(txt, labels, n, poptyp, wname)
 
   if (poptyp == ISGRAB) {
     BTSetActive(&bts[0], (int) strlen(gsBuf));
-    BTSetActive(&bts[1], (strlen(gsBuf)>0 && atoi(gsBuf)>0));
+    BTSetActive(&bts[1], (strlen(gsBuf)>(size_t)0 && atoi(gsBuf)>(size_t)0));
   }
   else if (poptyp == ISPAD) {
     BTSetActive(&bts[0], (int) strlen(gsBuf));
@@ -350,7 +354,7 @@ int GetStrPopUp(txt, labels, n, buf, buflen, filstr, allow)
   gsx = 10 + icon_width + 20;
   gsy = 10+(PUHIGH-30-BUTTH-gsh)/2;
 
-  if (strlen(txt) > 60)
+  if (strlen(txt) > (size_t) 60)
     gsy = PUHIGH - 10 - BUTTH - 10 - gsh - 20;
 
   gsw = PUWIDE - gsx - 10;
@@ -558,7 +562,7 @@ static void build1PadList(typstr, vals, nams, lenp, dvals, dnams, dlen)
 	strncpy(nams[*lenp], vals[*lenp], (size_t) 31);
       }
       
-      if (strlen(nams[*lenp]) > 20) {   /* fix long names */
+      if (strlen(nams[*lenp]) > (size_t) 20) {   /* fix long names */
 	char *sp = nams[*lenp] + 18;
 	*sp++ = '.';  *sp++ = '.';  *sp++ = '.';  *sp++ = '\0';
       }
@@ -1154,13 +1158,13 @@ static int doGSKey(c)
     /* if we have a string of any sort, turn on the default '\n' button
        (if there is one) */
     for (i=0; i<nbts && accel[i]!='\n'; i++);
-    if (i<nbts) BTSetActive(&bts[i], strlen(gsBuf)>0);
+    if (i<nbts) BTSetActive(&bts[i], (strlen(gsBuf) > (size_t) 0));
   }
   else if (popUp == ISGRAB) {
     /* need a string of length 1 to enable Grab (bts[0]), and a string
        with an atoi() of at least '1' to enable AutoGrab (bts[1]) */
-    BTSetActive(&bts[0], strlen(gsBuf)>0);
-    BTSetActive(&bts[1], (strlen(gsBuf)>0 && atoi(gsBuf)>0));
+    BTSetActive(&bts[0], (strlen(gsBuf) > (size_t) 0));
+    BTSetActive(&bts[1], (strlen(gsBuf)>(size_t)0 && atoi(gsBuf)>(size_t)0));
   }
 
   return(0);
@@ -1219,7 +1223,8 @@ static void drawGSBuf()
     XDrawLine(theDisp, popW, theGC, gsx+3, gsy+1, gsx+3, gsy + gsh-1);
   }
 
-  if (gsEnPos<strlen(gsBuf)) {  /* draw a "there's more over here" doowah */
+  if ((size_t) gsEnPos < strlen(gsBuf)) {
+    /* draw a "there's more over here" doowah */
     XDrawLine(theDisp, popW, theGC, gsx+gsw-3, gsy+1, gsx+gsw-3, gsy+gsh-1);
     XDrawLine(theDisp, popW, theGC, gsx+gsw-2, gsy+1, gsx+gsw-2, gsy+gsh-1);
     XDrawLine(theDisp, popW, theGC, gsx+gsw-1, gsy+1, gsx+gsw-1, gsy+gsh-1);

@@ -13,13 +13,13 @@
  * definition appropriately. (use 'which gunzip' to find if you have gunzip, 
  * and where it lives)
  */
-#define USE_GUNZIP
+#undef USE_GUNZIP
 
 #ifdef USE_GUNZIP
 #  ifdef VMS
 #    define GUNZIP "UNCOMPRESS"
 #  else
-#    define GUNZIP "/usr/bin/gunzip -q"
+#    define GUNZIP "/usr/local/bin/gunzip -q"
 #  endif
 #endif
 
@@ -35,7 +35,7 @@
  * as it tries to be clever on systems where uncompress lives in an unusual
  * location.
  */
-#undef UNCOMPRESS "/usr/ucb/uncompress"
+#define UNCOMPRESS "/usr/ucb/uncompress"
 
 #if defined(hpux) || defined(SVR4) || defined(__386BSD__)
 #  undef  UNCOMPRESS
@@ -88,9 +88,9 @@
  * should not need to be changed
  */
 
-#define GS_PATH "/usr/local/bin/gs"
-#define GS_LIB  "."
-#define GS_DEV  "ppmraw"
+/* #define GS_PATH "/usr/local/bin/gs" */
+/* #define GS_LIB  "."                 */
+/* #define GS_DEV  "ppmraw"            */
 
 
 /***************************************************************************

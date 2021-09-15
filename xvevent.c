@@ -71,7 +71,7 @@ int EventLoop()
 {
   XEvent event;
   int    retval,done,waiting;
-  struct timespec orgtime, curtime;
+  time_t orgtime, curtime;
 
 
 #ifndef NOSIGNAL
@@ -100,19 +100,18 @@ int EventLoop()
 
   while (!done) {
 
-    if (waitsec > -1.0 && canstartwait && !waiting && XPending(theDisp)==0) {
+    if (waitsec > -1 && canstartwait && !waiting && XPending(theDisp)==0) {
       /* we wanna wait, we can wait, we haven't started waiting yet, and 
 	 all pending events (ie, drawing the image the first time) 
 	 have been dealt with:  START WAITING */
-      clock_gettime(CLOCK_REALTIME, &orgtime);
+      time((time_t *) &orgtime);
       waiting = 1;
     }
 
 
     /* if there's an XEvent pending *or* we're not doing anything 
        in real-time (polling, flashing the selection, etc.) get next event */
-    if ((waitsec == -1 && !polling && !HaveSelection()) ||
-	XPending(theDisp)>0) {
+    if ((waitsec==-1 && !polling && !HaveSelection()) || XPending(theDisp)>0) {
       XNextEvent(theDisp, &event);
       retval = HandleEvent(&event,&done);
     }
@@ -130,15 +129,9 @@ int EventLoop()
 	else if (!XPending(theDisp)) sleep(1);
       }
 
-      if (waitsec > -1 && waiting) {
-	float curtime2, orgtime2;
-	clock_gettime(CLOCK_REALTIME, &curtime);
-	orgtime2 = (float)orgtime.tv_sec +
-		((float)orgtime.tv_nsec / 1000000000);
-	curtime2 = (float)curtime.tv_sec +
-		((float)curtime.tv_nsec / 1000000000);
-
-	if (curtime2 - orgtime2 < waitsec) usleep(50000);
+      if (waitsec>-1 && waiting) {
+	time((time_t *) &curtime);
+	if (curtime - orgtime < waitsec) sleep(1);
 	else {
 	  if (waitloop) return NEXTLOOP;
 	  else return NEXTQUIT;
@@ -1414,7 +1407,8 @@ static void handleKeyEvent(event, donep, retvalp)
 	  okay = 0;
 	  do {
 	    i = GetStrPopUp(txt, labels, 2, buf, 64, "0123456789", 1);
-	    if (!i && strlen(buf)>0) {   /* hit 'Ok', had a string entered */
+	    if (!i && strlen(buf) > (size_t) 0) {
+	      /* hit 'Ok', had a string entered */
 	      /* check for page in range */
 	      j = atoi(buf);
 	      if (j>=1 && j<=numPages) {
@@ -2037,6 +2031,7 @@ XWindowAttributes *xwa;
   xwc.height = xwa->height;
 
 
+#ifdef BAD_IDEA
   /* if there is a virtual window manager running, then we should translate
      the coordinates that are in terms of 'real' screen into coordinates
      that are in terms of the 'virtual' root window 
@@ -2050,7 +2045,7 @@ XWindowAttributes *xwa;
 		       xwc.x,xwc.y,x1,y1);
     xwc.x = x1;  xwc.y = y1;
   }
-  
+#endif  
 
 
   if (DEBUG) {

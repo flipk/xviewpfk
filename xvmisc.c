@@ -729,7 +729,7 @@ char *BaseName(fname)
      'simple' name ('weenie.gif').  Note that it does not make a copy of
      the name, so don't be modifying it... */
 
-  basname = rindex(fname, '/');
+  basname = (char *) rindex(fname, '/');
   if (!basname) basname = fname;
   else basname++;
 
@@ -770,32 +770,38 @@ void DrawTempGauge(win, x,y,w,h, ratio, fg,bg,hi,lo, str)
     XSetForeground(theDisp, theGC, fg);
     XFillRectangle(theDisp,win,theGC, x+3, y+3, (u_int) barwide, (u_int) h-5);
 
-    if (barwide < maxwide) {
-      if (numchars) {
+    if (numchars) {      /* do string */
+      if (barwide < maxwide) {
 	XSetForeground(theDisp, theGC, bg);
 	XFillRectangle(theDisp, win, theGC, x+3+barwide, y+3, 
 		       (u_int) (maxwide-barwide), (u_int) (h-5));
+      }
+	
+      XSetFunction(theDisp, theGC, GXinvert);
+      XSetPlaneMask(theDisp, theGC, fg ^ bg);
 
-	XSetForeground(theDisp, theGC, fg);
-	XDrawString(theDisp, win, theGC, CENTERX(mfinfo, (x+w/2), str), 
-		    CENTERY(mfinfo, (y+h/2)), str, numchars);
-      }
-      else {
-	XDrawLine(theDisp,win,theGC,x+3+barwide, y+h/2 + 0, x+w-3, y+h/2 + 0);
+      XDrawString(theDisp, win, theGC, CENTERX(mfinfo, (x+w/2), str), 
+		  CENTERY(mfinfo, (y+h/2)), str, numchars);
+
+      XSetFunction(theDisp, theGC, GXcopy);
+      XSetPlaneMask(theDisp, theGC, AllPlanes);
+    }
+
+    else if (barwide < maxwide) {
+      XDrawLine(theDisp,win,theGC,x+3+barwide, y+h/2 + 0, x+w-3, y+h/2 + 0);
       
-	XSetForeground(theDisp, theGC, lo);
-	XDrawLine(theDisp,win,theGC,x+3+barwide, y+h/2 + 1, x+w-3, y+h/2 + 1);
-	
-	XSetForeground(theDisp, theGC, hi);
-	XDrawLine(theDisp,win,theGC,x+3+barwide, y+h/2 + 2, x+w-3, y+h/2 + 2);
-	
-	XSetForeground(theDisp, theGC, bg);
-	XFillRectangle(theDisp, win, theGC, x+3+barwide, y+3, 
-		       (u_int) (maxwide-barwide), (u_int) (h/2 - 3));
-	
-	XFillRectangle(theDisp, win, theGC, x+3+barwide, y+h/2 + 3, 
-		       (u_int) (maxwide-barwide),(u_int)((h-3) - (h/2+3)) + 1);
-      }
+      XSetForeground(theDisp, theGC, lo);
+      XDrawLine(theDisp,win,theGC,x+3+barwide, y+h/2 + 1, x+w-3, y+h/2 + 1);
+      
+      XSetForeground(theDisp, theGC, hi);
+      XDrawLine(theDisp,win,theGC,x+3+barwide, y+h/2 + 2, x+w-3, y+h/2 + 2);
+      
+      XSetForeground(theDisp, theGC, bg);
+      XFillRectangle(theDisp, win, theGC, x+3+barwide, y+3, 
+		     (u_int) (maxwide-barwide), (u_int) (h/2 - 3));
+      
+      XFillRectangle(theDisp, win, theGC, x+3+barwide, y+h/2 + 3, 
+		     (u_int) (maxwide-barwide),(u_int)((h-3) - (h/2+3)) + 1);
     }
   }
 
@@ -806,26 +812,32 @@ void DrawTempGauge(win, x,y,w,h, ratio, fg,bg,hi,lo, str)
     XSetForeground(theDisp, theGC, fg);
     XFillRectangle(theDisp,win,theGC, x+1, y+1, (u_int) barwide, (u_int) h-1);
 
-    if (barwide < maxwide) {
-      if (numchars) {
+    if (numchars) {
+      if (barwide < maxwide) {
 	XSetForeground(theDisp, theGC, bg);
 	XFillRectangle(theDisp, win, theGC, x+1+barwide, y+1, 
 		       (u_int) (maxwide-barwide), (u_int) (h-1));
+      }
+      
+      XSetFunction(theDisp, theGC, GXinvert);
+      XSetPlaneMask(theDisp, theGC, fg ^ bg);
 
-	XSetForeground(theDisp, theGC, fg);
-	XDrawString(theDisp, win, theGC, CENTERX(mfinfo, (x+w/2), str), 
-		    CENTERY(mfinfo, (y+h/2)), str, numchars);
-      }
-      else {
-	XDrawLine(theDisp, win, theGC, x+1+barwide, y+h/2, x+w-1, y+h/2);
-	
-	XSetForeground(theDisp, theGC, bg);
-	XFillRectangle(theDisp, win, theGC, x+1+barwide, y+1, 
-		       (u_int) (maxwide-barwide), (u_int) (h/2 - 1));
-	
-	XFillRectangle(theDisp, win, theGC, x+1+barwide, y+h/2 + 1, 
-		       (u_int)(maxwide-barwide),(u_int)(((h-1) - (h/2+1))+1));
-      }
+      XDrawString(theDisp, win, theGC, CENTERX(mfinfo, (x+w/2), str), 
+		  CENTERY(mfinfo, (y+h/2)), str, numchars);
+
+      XSetFunction(theDisp, theGC, GXcopy);
+      XSetPlaneMask(theDisp, theGC, AllPlanes);
+    }
+    
+    else if (barwide < maxwide) {
+      XDrawLine(theDisp, win, theGC, x+1+barwide, y+h/2, x+w-1, y+h/2);
+      
+      XSetForeground(theDisp, theGC, bg);
+      XFillRectangle(theDisp, win, theGC, x+1+barwide, y+1, 
+		     (u_int) (maxwide-barwide), (u_int) (h/2 - 1));
+      
+      XFillRectangle(theDisp, win, theGC, x+1+barwide, y+h/2 + 1, 
+		     (u_int)(maxwide-barwide),(u_int)(((h-1) - (h/2+1))+1));
     }
   }
 
@@ -1117,8 +1129,9 @@ void Timer(msec)   /* waits for 'n' milliseconds */
 
     time.tv_sec = usec / 1000000L;
     time.tv_usec = usec % 1000000L;
-    select(0, (fd_set *) NULL, (fd_set *) NULL, (fd_set *) NULL, &time);
+    select(0, XV_FDTYPE NULL, XV_FDTYPE NULL, XV_FDTYPE NULL, &time);
   }
 #endif /* VMS */
 }
+
 

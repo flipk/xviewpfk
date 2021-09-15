@@ -1,12 +1,84 @@
 Revision History
 ----------------
 
-Make_xv.com in vms directory wouldn't build xvxpm.c or xvfits.c (and thus, XV!)
-				(Rick Dyson  (dyson@sunfish.Physics.UIowa.Edu))
+XV 3.10a bug-fix release  12/29/94
+----------------------------------
+Bug Fix:  Problems loading JPEG files in 8-bit mode on some systems.
+				(Rick Richardson (rick@digibd.com))
+				(Chad R. Larson  (chad@anasazi.com))
+
+Bug Fix:  Added '-pkludge' command line option and 'popupKludge' boolean 
+	resource.  If true, selects the 'old-style' pop-up window positioning
+	code.  The various popup windows should appear with the Ok button
+	(or whatever) centered around the cursor.  If the windows routinely
+	pop up slightly off-center from the cursor, try turning this on.
+
+Bug Fix:  '3' and 'Q' characters in the Text Annotation character set were
+	boogered up...		(Sidik Isani (si@acpub.duke.edu))
+
+Bug Fix:  '-iconic' option wasn't working.
+				(David Pesetsky  (iedsp@agt.gmeds.com))
+
+Bug Fix:  Didn't properly read greyscale RLE files.
+				(Robert Cunningham  (rkc@xn.ll.mit.edu))
+
+Bug Fix:  'AutoCrop' on 24-bit images could produce 0x0 images.  A problem!
+				(Leon Shaner  (leon@mtu.edu))
+
+Bug Fix:  GIF reader would blow up if there were multiple comments.
+				(Markus Gyger  (mgyger@itr.ch))
+
+Bug Fix:  Behavior under virtual window managers may be improved.
+				(steveg@pa.dec.com)
+
+Enhancement:  Text in 'temperature gauge' (during slow operations) is now
+	XOR'd on, so it isn't obscured by the filled area of the gauge.
+				(Jerry Whelan  (jerryw@bnl.gov))
+
+Enhancement:  man page for vdcomp written
+				(James Ralston Crawford  (qralston+@pitt.edu))
+
+Enhancement:  PCX code can now read 24-bit PCX files.
+				(Dave Cohrs  (cohrs@legato.com))
+
+Portability:  Patch for Linux	(David Hankins  (dhankins@oz.net))
+
+Portability:  Patches for ISC 4.0 Interactive/SunSoft Unix
+				(Jack Bailey  (jjb@jagware.bcc.com))
+
+Portability:  Compiler noise (from Sun's Professional C compiler) cleaned up.
+				(John Fritz  (jfritz@bpo-ess.ceco.com))
+
+Portability:  Many nits picked by Pyramid compiler
+				(Chad R. Larson  (chad@anasazi.com))
+
+Portability:  Some malloc's in xvfits.c needed casting.
+				(Bill Silvert  (sysop@biome.bio.ns.ca))
+
+Portability:  Further VMS problems solved.
+				(Rick Dyson (dyson@sunfish.physics.uiowa.edu))
+
+Portability:  select() on HP-UX 9.x expects (int *) instead of (fd_set *)
+				(Richard Allen  (ra@os.is))
+
+Portability:  Removed 'const' from second parameter in decl. for decode_run()
+	in tif_fax3.c.		(Glenn Spargo  (gspargo@ctron.com))
+
+Portability:  Added 'fcntl.h' to xv.h, as some systems may not have O_RDONLY
+	declared elsewhere.	(Mitchell Blank  (blankm@cae.wisc.edu))
+
+Portability:  Font selection strings in xv.c didn't have enough '*'s in them.
+	Would fail on some X servers.
+				(Rick Richardson  (rick@digibd.com))
+
+Second XV 3.10 Public Release  12/22/94
+----------------------------------------
+Bug Fix:  Make_xv.com in vms directory wouldn't build xvxpm.c or xvfits.c 
+	(and thus, XV!)		(Rick Dyson  (dyson@sunfish.Physics.UIowa.Edu))
 
 
-XV 3.10 Public Release  12/21/94
--------------------------
+Initial XV 3.10 Public Release  12/21/94
+----------------------------------------
 Bug Fix:  Greyscale downsampling bug in JPEG code fixed.
 				(Tom Lane  (tgl@sss.pgh.pa.us))
 

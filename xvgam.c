@@ -1838,7 +1838,8 @@ void GammifyColors()
       gMap[i] = gcmap[i];
       bMap[i] = bcmap[i];
       if (!ncols) 
-	cols[i] = (rMap[i] + gMap[i] + bMap[i] >= 128*3) ? white : black;
+	cols[i] = (((int)rMap[i]) + ((int)gMap[i]) + ((int)bMap[i]) >= 128*3)
+	  ? white : black;
     }
   }
 }
@@ -1903,7 +1904,9 @@ int col;
   bMap[col] = bGraf.func[bv];
 
   if (!ncols) 
-    cols[col] = (rMap[col] + gMap[col] + bMap[col] >= 128*3) ? white : black;
+    cols[col] = 
+      (((int)rMap[col]) + ((int)gMap[col]) + ((int)bMap[col]) >= 128*3) 
+	? white : black;
 
   if (DEBUG>1) fprintf(stderr," -> %d,%d,%d\n",rMap[col],gMap[col],bMap[col]);
 }

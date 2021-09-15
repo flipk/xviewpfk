@@ -25,9 +25,9 @@
 
 
 /* program needs one of the following fonts.  Trys them in ascending order */
-#define FONT1 "-*-lucida-medium-r-*-*-12-*"
-#define FONT2 "-*-helvetica-medium-r-*-*-12-*"
-#define FONT3 "-*-helvetica-medium-r-*-*-11-*"
+#define FONT1 "-*-lucida-medium-r-*-*-12-*-*-*-*-*-*-*"
+#define FONT2 "-*-helvetica-medium-r-*-*-12-*-*-*-*-*-*-*"
+#define FONT3 "-*-helvetica-medium-r-*-*-11-*-*-*-*-*-*-*"
 #define FONT4 "6x13"
 #define FONT5 "fixed"
 
@@ -218,7 +218,7 @@ int main(argc, argv)
   fgstr = "#000000";  bgstr = "#B2C0DC";
   histr = "#C6D5E2";  lostr = "#8B99B5";
 
-  cmd = rindex(argv[0],'/');
+  cmd = (char *) rindex(argv[0],'/');
   if (!cmd) cmd = argv[0]; else cmd++;
 
   tmpstr = (char *) getenv("TMPDIR");
@@ -238,7 +238,7 @@ int main(argc, argv)
   ninstall = 0;  fixedaspect = 0;  noFreeCols = nodecor = 0;
   DEBUG = 0;  bwidth = 2;
   nolimits = useroot = clrroot = noqcheck = 0;
-  waitsec = -1.0;  waitloop = 0;  automax = 0;
+  waitsec = -1;  waitloop = 0;  automax = 0;
   rootMode = 0;  hsvmode = 0;
   rmodeset = gamset = cgamset = 0;
   nopos = limit2x = 0;
@@ -261,7 +261,7 @@ int main(argc, argv)
   xorMasks[6] = 0xc4c4c4c5;
   xorMasks[7] = 0xffffffff;
 
-  kludge_offx = kludge_offy = 0;
+  kludge_offx = kludge_offy = winCtrPosKludge = 0;
 
   conv24 = CONV24_SLOW;  /* use 'slow' algorithm by default */
 
@@ -1107,6 +1107,7 @@ static void parseResources(argc, argv)
   if (rd_flag("nostat"))         nostat      = def_int;
   if (rd_flag("ownCmap"))        owncmap     = def_int;
   if (rd_flag("perfect"))        perfect     = def_int;
+  if (rd_flag("popupKludge"))    winCtrPosKludge = def_int;
   if (rd_str ("print"))          strncpy(printCmd, def_str, 
 					 (size_t) PRINTCMDLEN);
   if (rd_flag("pscompress"))     pscomp      = def_int;
@@ -1361,6 +1362,7 @@ static void parseCmdLine(argc, argv)
     else if (!argcmp(argv[i],"-nostat",    4,1,&nostat));     /* nostat */
     else if (!argcmp(argv[i],"-owncmap",   2,1,&owncmap));    /* own cmap */
     else if (!argcmp(argv[i],"-perfect",   3,1,&perfect));    /* -perfect */
+    else if (!argcmp(argv[i],"-pkludge",   3,1,&winCtrPosKludge));
     else if (!argcmp(argv[i],"-poll",      3,1,&polling));    /* chk mod? */
 
     else if (!argcmp(argv[i],"-preset",3,0,&pm))      /* preset */
@@ -1424,8 +1426,8 @@ static void parseCmdLine(argc, argv)
 
     else if (!argcmp(argv[i],"-wait",3,0,&pm)) {        /* secs betwn pics */
       if (++i<argc) {
-	waitsec = atof(argv[i]);
-	if (waitsec < 0.0) waitsec = 0.0;
+	waitsec = abs(atoi(argv[i]));
+	if (waitsec<0) waitsec = 0;
       }
     }
     
@@ -1498,7 +1500,7 @@ static void verifyArgs()
     preset = 0;
   } 
 
-  if (waitsec < 0.0) noFreeCols = 0; /* disallow nfc if not doing slideshow */
+  if (waitsec < 0) noFreeCols = 0;   /* disallow nfc if not doing slideshow */
   if (noFreeCols && perfect) { perfect = 0;  owncmap = 1; }
 
   /* decide what default color allocation stuff we've settled on */
@@ -1615,6 +1617,7 @@ static void cmdSyntax()
   printoption("[-/+nostat]");
   printoption("[-/+owncmap]");
   printoption("[-/+perfect]");
+  printoption("[-/+pkludge]");
   printoption("[-/+poll]");
   printoption("[-preset #]");
   printoption("[-quick24]");
@@ -1683,7 +1686,8 @@ static int argcmp(a1, a2, minlen, plusallowed, plusminus)
 
   int i;
 
-  if (strlen(a1) < minlen || strlen(a2) < minlen) return 1;
+  if ((strlen(a1) < (size_t) minlen) || (strlen(a2) < (size_t) minlen))
+    return 1;
   if (strlen(a1) > strlen(a2)) return 1;
 
   if (strncmp(a1+1, a2+1, strlen(a1)-1)) return 1;
@@ -1860,7 +1864,8 @@ static int openPic(filenum)
 
 
   /* chop off trailing ".Z", ".z", or ".gz" from displayed basefname, if any */
-  if (strlen(basefname)>2 && strcmp(basefname+strlen(basefname)-2,".Z")==0)
+  if (strlen(basefname) > (size_t) 2     && 
+      strcmp(basefname+strlen(basefname)-2,".Z")==0)
     basefname[strlen(basefname)-2]='\0';
   else {
 #ifdef GUNZIP
@@ -2404,7 +2409,7 @@ static int openPic(filenum)
     if (autodither && ncols>0) epicMode = EM_DITH;
 
     /* if in CM_STDCMAP mode, and *not* in '-wait 0', then autodither */
-    if (colorMapMode == CM_STDCMAP && waitsec != 0.0) epicMode = EM_DITH;
+    if (colorMapMode == CM_STDCMAP && waitsec != 0) epicMode = EM_DITH;
 
     /* if -smooth or image has been shrunk to fit screen */
     if (autosmooth || (pWIDE >maxWIDE || pHIGH>maxHIGH)
@@ -2698,8 +2703,9 @@ int UncompressFile(name, uncompname)
      to what it was.  necessary because uncompress doesn't handle files
      that don't end with '.Z' */
 
-  if (strlen(name)>=2 && strcmp(name + strlen(name)-2,".Z")!=0 &&
-                         strcmp(name + strlen(name)-2,".z")!=0) {
+  if (strlen(name) >= (size_t) 2            && 
+      strcmp(name + strlen(name)-2,".Z")!=0 &&
+      strcmp(name + strlen(name)-2,".z")!=0) {
     strcpy(namez, name);
     strcat(namez,".Z");
 
@@ -2890,7 +2896,7 @@ static int readpipe(cmd, fname)
   char fullcmd[512], tmpname[64], str[512];
   int i;
 
-  if (!cmd || strlen(cmd)<2) return 1;
+  if (!cmd || (strlen(cmd) < (size_t) 2)) return 1;
 
   sprintf(tmpname,"%s/xvXXXXXX", tmpdir);
   mktemp(tmpname);
@@ -3270,7 +3276,7 @@ static void createMainWindow(geom, name)
 
   xwmh.icon_pixmap = iconPix;  
   xwmh.icon_mask   = iconmask;  
-  xwmh.flags |= ( IconPixmapHint | IconMaskHint) ;
+  xwmh.flags |= (IconPixmapHint | IconMaskHint);
 
 
   if (startIconic && firstTime) {
@@ -3787,7 +3793,10 @@ void HandleDispMode()
 		     | EnterWindowMask | LeaveWindowMask );
 
 	StoreDeleteWindowProp(mainW);
+	XFlush(theDisp);
 	XMapWindow(theDisp,mainW);
+	XFlush(theDisp);
+	if (startIconic) sleep(2);   /* give it time to get the window up...*/
       }
     }
 

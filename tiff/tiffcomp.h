@@ -67,6 +67,10 @@
 #endif
 #endif
 
+#ifdef isc
+#define BSDTYPES
+#endif
+
 /*
  * Workarounds for BSD lseek definitions.
  */

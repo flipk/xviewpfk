@@ -257,7 +257,7 @@ int LoadRLE(fname, pinfo)
 
   if (ncolors == 1) {     /* grayscale or PseudoColor */
     pinfo->type = PIC8;
-    if (ncmap == 1) {
+    if (ncmap == 0 || ncmap == 1) {   /* grey, or grey with gamma curve */
       pinfo->colType = F_GREYSCALE;
       sprintf(pinfo->fullInfo, "Greyscale RLE.  (%ld bytes)", filesize);
       for (i=0; i<256; i++) 

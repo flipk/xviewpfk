@@ -102,7 +102,7 @@ int main(argc, argv)
       continue;
     }
     
-    strind = index(argv[i], ':');		/* old-style display */
+    strind = (char *) index(argv[i], ':');	/* old-style display */
     if(strind != NULL) {
       display = argv[i];
       continue;

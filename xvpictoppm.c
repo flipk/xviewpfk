@@ -124,9 +124,9 @@ static byte *loadThumbFile(wptr, hptr)
 
   /* convert icon from 332 to 24-bit image */
   for (i=0, ip=icon8, pp=pic24;  i<w*h;  i++, ip++, pp+=3) {
-    pp[0] = (((*ip >> 5) & 0x07) * 255) / 7;
-    pp[1] = (((*ip >> 2) & 0x07) * 255) / 7;
-    pp[2] = (((*ip >> 0) & 0x03) * 255) / 3;
+    pp[0] = ( ((int) ((*ip >> 5) & 0x07)) * 255) / 7;
+    pp[1] = ( ((int) ((*ip >> 2) & 0x07)) * 255) / 7;
+    pp[2] = ( ((int) ((*ip >> 0) & 0x03)) * 255) / 3;
   }
 
   free(icon8);

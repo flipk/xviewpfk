@@ -36,9 +36,10 @@
 #define PCX_MAPSTART 0x0c	/* Start of appended colormap	*/
 
 
-static int  pcxLoadImage  PARM((char *, FILE *, byte *, byte *, int, int));
-static void pcxLoadRaster PARM((FILE *, byte *, int, byte *, int, int));
-static int  pcxError      PARM((char *, char *));
+static int  pcxLoadImage8  PARM((char *, FILE *, PICINFO *, byte *));
+static int  pcxLoadImage24 PARM((char *, FILE *, PICINFO *, byte *));
+static void pcxLoadRaster  PARM((FILE *, byte *, int, byte *, int, int));
+static int  pcxError       PARM((char *, char *));
 
 
 
@@ -52,7 +53,7 @@ int LoadPCX(fname, pinfo)
   long   filesize;
   char  *bname, *errstr;
   byte   hdr[128], *image;
-  int    i, colors, gray;
+  int    i, colors, gray, fullcolor;
 
   pinfo->type = PIC8;
   pinfo->pic     = (byte *) NULL;
@@ -92,6 +93,7 @@ int LoadPCX(fname, pinfo)
   pinfo->w++;  pinfo->h++;
 
   colors = 1 << (hdr[PCX_BPP] * hdr[PCX_PLANES]);
+  fullcolor = (hdr[PCX_BPP] == 8 && hdr[PCX_PLANES] == 3);
 
   if (DEBUG) {
     fprintf(stderr,"PCX: %dx%d image, version=%d, encoding=%d\n", 
@@ -102,7 +104,7 @@ int LoadPCX(fname, pinfo)
 	    colors);
   }
 
-  if (colors>256) {
+  if (colors>256 && !fullcolor) {
     fclose(fp);
     return pcxError(bname,"No more than 256 colors allowed in PCX file.");
   }
@@ -112,23 +114,25 @@ int LoadPCX(fname, pinfo)
     return pcxError(bname,"Unsupported PCX encoding format.");
   }
 
-  /* note:  overallocation to make life easier... */
-  image = (byte *) malloc((size_t) (pinfo->h + 1) * pinfo->w + 16);
-  if (!image) FatalError("Can't alloc 'image' in LoadPCX()");
-
-  xvbzero((char *) image, (size_t) ((pinfo->h+1) * pinfo->w + 16));
-
-  if (!pcxLoadImage(bname, fp, image, hdr, pinfo->w, pinfo->h)) {
-    free(image);
-    fclose(fp);
-    return 0;
+  /* load the image, the image function fills in pinfo->pic */
+  if (!fullcolor) {
+    if (!pcxLoadImage8(bname, fp, pinfo, hdr)) {
+      fclose(fp);
+      return 0;
+    }
+  }
+  else {
+    if (!pcxLoadImage24(bname, fp, pinfo, hdr)) {
+      fclose(fp);
+      return 0;
+    }
   }
 
 
   if (ferror(fp) | feof(fp))    /* just a warning */
     pcxError(bname, "PCX file appears to be truncated.");
 
-  if (colors>16) {       /* handle trailing colormap */
+  if (colors>16 && !fullcolor) {       /* handle trailing colormap */
     while (1) {
       i=getc(fp);
       if (i==PCX_MAPSTART || i==EOF) break;
@@ -171,15 +175,17 @@ int LoadPCX(fname, pinfo)
   /* finally, convert into XV internal format */
 
 
-  pinfo->pic     = image;
-  pinfo->type    = PIC8;
+  pinfo->type    = fullcolor ? PIC24 : PIC8;
   pinfo->frmType = -1;    /* no default format to save in */
 
   /* check for grayscaleitude */
-  for (i=0; i<colors; i++) {
-    if ((pinfo->r[i] != pinfo->g[i]) || (pinfo->r[i] != pinfo->b[i])) break;
+  gray = 0;
+  if (!fullcolor) {
+    for (i=0; i<colors; i++) {
+      if ((pinfo->r[i] != pinfo->g[i]) || (pinfo->r[i] != pinfo->b[i])) break;
+    }
+    gray = (i==colors) ? 1 : 0;
   }
-  gray = (i==colors) ? 1 : 0;
 
 
   if (colors > 2 || (colors==2 && !gray)) {  /* grayscale or PseudoColor */
@@ -205,23 +211,107 @@ int LoadPCX(fname, pinfo)
 
 
 /*****************************/
-static int pcxLoadImage(fname, fp, image, hdr, w, h)
-     char *fname;
-     FILE *fp;
-     byte *image, *hdr;
-     int   w, h;
+static int pcxLoadImage8(fname, fp, pinfo, hdr)
+     char    *fname;
+     FILE    *fp;
+     PICINFO *pinfo;
+     byte    *hdr;
 {
+  /* load an image with at most 8 bits per pixel */
+  
+  byte *image;
+  
+  /* note:  overallocation to make life easier... */
+  image = (byte *) malloc((size_t) (pinfo->h + 1) * pinfo->w + 16);
+  if (!image) FatalError("Can't alloc 'image' in pcxLoadImage8()");
+  
+  xvbzero((char *) image, (size_t) ((pinfo->h+1) * pinfo->w + 16));
+  
   switch (hdr[PCX_BPP]) {
-  case 1:   pcxLoadRaster(fp, image, 1, hdr, w, h);   break;
-  case 8:   pcxLoadRaster(fp, image, 8, hdr, w, h);   break;
+  case 1:   pcxLoadRaster(fp, image, 1, hdr, pinfo->w, pinfo->h);   break;
+  case 8:   pcxLoadRaster(fp, image, 8, hdr, pinfo->w, pinfo->h);   break;
   default:
     pcxError(fname, "Unsupported # of bits per plane.");
+    free(image);
     return (0);
   }
 
+  pinfo->pic = image;
   return 1;
 }
 
+
+/*****************************/
+static int pcxLoadImage24(fname, fp, pinfo, hdr)
+     char *fname;
+     FILE *fp;
+     PICINFO *pinfo;
+     byte *hdr;
+{
+  byte *pix, *pic24, scale[256];
+  int   c, i, j, w, h, maxv, cnt, planes, bperlin, nbytes;
+  
+  w = pinfo->w;  h = pinfo->h;
+  
+  planes = (int) hdr[PCX_PLANES];
+  bperlin = hdr[PCX_BPRL] + ((int) hdr[PCX_BPRH]<<8);
+  
+  /* allocate 24-bit image */
+  pic24 = (byte *) malloc((size_t) w*h*planes);
+  if (!pic24) FatalError("couldn't malloc 'pic24'");
+  
+  xvbzero((char *) pic24, (size_t) w*h*planes);
+  
+  maxv = 0;
+  pix = pinfo->pic = pic24;
+  i = 0;      /* planes, in this while loop */
+  j = 0;      /* bytes per line, in this while loop */
+  nbytes = bperlin*h*planes;
+ 
+  while (nbytes > 0 && (c = getc(fp)) != EOF) {
+    if ((c & 0xC0) == 0xC0) {   /* have a rep. count */
+      cnt = c & 0x3F;
+      c = getc(fp);
+      if (c == EOF) { getc(fp); break; }
+    }
+    else cnt = 1;
+    
+    if (c > maxv)  maxv = c;
+    
+    while (cnt-- > 0) {
+      if (j < w) {
+	*pix = c;
+	pix += planes;
+      }
+      j++;
+      nbytes--;
+      if (j == bperlin) {
+	j = 0;
+	if (++i < planes) {
+	  pix -= (w*planes)-1;  /* next plane on this line */
+	}
+	else {
+	  pix -= (planes-1);    /* start of next line, first plane */
+	  i = 0;
+	}
+      }
+    }
+  }
+  
+  
+  /* scale all RGB to range 0-255, if they aren't */
+
+  if (maxv<255) { 
+    for (i=0; i<=maxv; i++) scale[i] = (i * 255) / maxv;
+    
+    for (i=0, pix=pic24; i<h; i++) {
+      if ((i&0x3f)==0) WaitCursor();
+      for (j=0; j<w*planes; j++, pix++) *pix = scale[*pix];
+    }
+  }
+  
+  return 1;
+}
 
 
 

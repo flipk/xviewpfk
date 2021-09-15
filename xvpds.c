@@ -513,7 +513,7 @@ int LoadPDS(fname, pinfo)
       } else if ((sscanf(scanbuff," EXPOSURE_DURATION = %s", exposure) == 1)
 	      || (sscanf(scanbuff," INSTRUMENT_EXPOSURE_DURATION = %s",
 			 exposure) == 1)) {
-	tmptmp = index(scanbuff,'=');
+	tmptmp = (char *) index(scanbuff,'=');
 	tmptmp++;
 	while((*tmptmp) == ' ')
 	    tmptmp++;
@@ -521,7 +521,7 @@ int LoadPDS(fname, pinfo)
 	lastwasinote=FALSE; continue;
 
       } else if (sscanf(scanbuff, "NOTE = %s", inote) == 1) {
-	tmptmp = index(scanbuff,'='); tmptmp++;
+	tmptmp = (char *) index(scanbuff,'='); tmptmp++;
 	while (((*tmptmp) == ' ') || ((*tmptmp)  == '"')) tmptmp++;
 	strcpy(inote,tmptmp);
 	strcat(inote," ");
@@ -884,9 +884,11 @@ static int Convert16BitImage(fname, pinfo, swab)
 
   /* check whether histogram file exists */
 #ifdef VMS
-  c = rindex(strcpy(name, (c = rindex(fname, ':')) ? c+1 : fname), ']');
+  c = (char *) rindex(strcpy(name, 
+			     (c = (char *) rindex(fname, ':')) ? c+1 : fname),
+		      ']');
 #else
-  c = rindex(strcpy(name, fname), '/');
+  c = (char *) rindex(strcpy(name, fname), '/');
 #endif /* VMS */
   (void)strcpy(c ? c+1 : name, "hist.tab");
 
@@ -979,9 +981,11 @@ static int LoadPDSPalette(fname, pinfo)
   int     i, n, r, g, b;
   
 #ifdef VMS
-  c = rindex(strcpy(name, (c = rindex(fname, ':')) ? c+1 : fname), ']');
+  c = (char *) rindex(strcpy(name, 
+			     (c = (char *) rindex(fname, ':')) ? c+1 : fname),
+		      ']');
 #else
-  c = rindex(strcpy(name, fname), '/');
+  c = (char *) rindex(strcpy(name, fname), '/');
 #endif /* VMS */
   (void)strcpy(c ? c+1 : name, "palette.tab");
   

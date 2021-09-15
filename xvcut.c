@@ -760,7 +760,7 @@ static byte *getFromClip()
       len |= ((int) data[2])<<16;
       len |= ((int) data[3])<<24;
 
-      XFree(data);
+      XFree((void *) data);
 
       /* read the rest of the data (len bytes) */
       i = XGetWindowProperty(theDisp, rootW, clipAtom, 1L, 
@@ -774,7 +774,7 @@ static byte *getFromClip()
 
 	data1 = (byte *) malloc((size_t) len);
 	if (!data1) {
-	  XFree(data);
+	  XFree((void *) data);
 	  ErrPopUp("Insufficient memory to retrieve clipboard!", "\nShucks!");
 	  return (byte *) NULL;
 	}
@@ -785,7 +785,7 @@ static byte *getFromClip()
 	data1[3] = (len>>24) & 0xff;
 	xvbcopy((char *) data, (char *) data1+4, (size_t) len-4);
 
-	XFree(data);
+	XFree((void *) data);
 	return data1;
       }
     }

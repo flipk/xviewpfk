@@ -264,6 +264,7 @@ InstallManPageLong(docs/xv,$(MANDIR),xv)
 InstallManPageLong(docs/bggen,$(MANDIR),bggen)
 InstallManPageLong(docs/xcmap,$(MANDIR),xcmap)
 InstallManPageLong(docs/xvp2p,$(MANDIR),xvpictoppm)
+InstallManPageLong(docs/vdcomp,$(MANDIR),vdcomp)
 
 tar:
 	tar cf xv.tar Makefile* Imakefile *.c *.h bits docs \

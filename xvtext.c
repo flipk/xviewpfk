@@ -1220,7 +1220,7 @@ void ShowLicense()
   LC("the xv distribution.  Do *not* send mail unless absolutely necessary");
   LC("(ie, you don't have ftp capability).");
   LC("");
-  LC("Note:  The documentation ('xvdocs.ps') may be installed in '/usr/local'.");
+  LC("Note:  The docs (xvdocs.ps) may be installed in '/usr/local/lib'.");
   LC("");
   LC("If you're viewing this information via the 'About XV' command, and");
   LC("you'd like to print it out, a copy of this info can be found in the ");

@@ -650,7 +650,7 @@ void LoadCurrentDirectory()
   changedDir = strcmp(path, oldpath);
   strcpy(oldpath, path);
 
-  if (strlen(path)>1 && path[strlen(path)-1] != '/')
+  if ((strlen(path) > (size_t) 1) && path[strlen(path)-1] != '/')
     strcat(path,"/");   /* tack on a trailing '/' to make path consistent */
 
   /* path will be something like: "/u3/bradley/src/weiner/whatever/" */
@@ -851,7 +851,7 @@ int DirKey(c)
     xvbcopy(&filename[curPos], &filename[curPos-1], (size_t) (len-curPos+1));
     curPos--;
 
-    if (strlen(filename)>0) scrollToFileName();
+    if (strlen(filename) > (size_t) 0) scrollToFileName();
   }
 
   else if (c=='\025') {                 /* ^U: clear entire line */
@@ -1023,7 +1023,8 @@ void RedrawDNamW()
     XDrawLine(theDisp, dnamW, theGC, 2,0,2,LINEHIGH+5);
   }
 
-  if (enPos<strlen(filename)) {  /* draw a "there's more over here" doowah */
+  if ((size_t) enPos < strlen(filename)) { 
+    /* draw a "there's more over here" doowah */
     XDrawLine(theDisp, dnamW, theGC, DNAMWIDE+5,0,DNAMWIDE+5,LINEHIGH+5);
     XDrawLine(theDisp, dnamW, theGC, DNAMWIDE+4,0,DNAMWIDE+4,LINEHIGH+5);
     XDrawLine(theDisp, dnamW, theGC, DNAMWIDE+3,0,DNAMWIDE+3,LINEHIGH+5);
@@ -1538,7 +1539,7 @@ int Globify(fname)
   if (*fname != '~') return 0; /* doesn't start with a tilde, don't expand */
 
   /* look for the first '/' after the tilde */
-  sp = index(fname,'/');
+  sp = (char *) index(fname,'/');
   if (sp == 0) {               /* no '/' after the tilde */
     sp = fname+strlen(fname);  /* sp = end of string */
   }

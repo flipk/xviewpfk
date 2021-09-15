@@ -69,7 +69,7 @@ int LoadFITS(fname, pinfo, quick)
   char  basename[64];
 
   if (fits_block == NULL) {
-    fits_block = malloc((size_t) BLOCKSIZE);
+    fits_block = (char *) malloc((size_t) BLOCKSIZE);
     if (!fits_block) FatalError("Insufficient memory for FITS block buffer");
   }
   
@@ -170,7 +170,7 @@ int WriteFITS(fp,pic,ptype,w,h,rmap,gmap,bmap,numcols,colorstyle,comment)
   byte  rgb[256];
   
   if (!fits_block) {
-    fits_block = malloc((size_t) BLOCKSIZE);
+    fits_block = (char *) malloc((size_t) BLOCKSIZE);
     if (!fits_block) FatalError("Insufficient memory for FITS block buffer");
   }
   
@@ -498,7 +498,7 @@ static char *rdheader(fs)
       j++;                          /* make j length of comment */
       if (j > 0) {                  /* skip blank comment cards */
 	if (fs->comment == NULL) {
-	  fs->comment = malloc((size_t) commsize);
+	  fs->comment = (char *) malloc((size_t) commsize);
 	  if (fs->comment == NULL)
 	    FatalError("Insufficient memory for comment buffer");
 	}

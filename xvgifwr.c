@@ -141,7 +141,7 @@ int WriteGIF(fp, pic, ptype, w, h, rmap, gmap, bmap, numcols, colorstyle,
     fprintf(stderr,"WrGIF: pic=%lx, w,h=%dx%d, numcols=%d, Bits%d,Cmap=%d\n",
 	    (u_long) pic8, w,h,numcols,BitsPerPixel,ColorMapSize);
 
-  if (comment && strlen(comment)>0)
+  if (comment && strlen(comment) > (size_t) 0)
     fwrite("GIF89a", (size_t) 1, (size_t) 6, fp);    /* the GIF magic number */
   else
     fwrite("GIF87a", (size_t) 1, (size_t) 6, fp);    /* the GIF magic number */
@@ -175,7 +175,7 @@ int WriteGIF(fp, pic, ptype, w, h, rmap, gmap, bmap, numcols, colorstyle,
     }
   }
 
-  if (comment && strlen(comment)>0) {   /* write comment blocks */
+  if (comment && strlen(comment) > (size_t) 0) {   /* write comment blocks */
     char *sp;
     int   i, blen;
 

@@ -92,6 +92,17 @@ PDS = -DDOPDS
 #MCHN= -Dhpux -D_HPUX_SOURCE
 # To use old HP compilers (HPUX 7.0 or so), you may need
 #MCHN= -Dhpux -D_HPUX_SOURCE +Ns4000
+#
+# also, if you're using HP's compiler, add '-Aa' to whichever of those
+# two lines you're using, to turn on ANSI C mode.  Or so I'm told.
+#
+# note:  You may need to add '-I/usr/include/X11R5' (or R6, or whatever)
+# to whichever of those lines you used, as HP tends to store their X11
+# include files in a non-standard place...
+
+
+### for LINUX, uncomment the following line
+#MCHN = -DLINUX
 
 
 # For SCO 1.1 (UNIX 3.2v2) machines, uncomment the following:
@@ -111,10 +122,8 @@ PDS = -DDOPDS
 #
 #MCHN = -q extensions=pcc_c -D__UMAXV__ -L/usr2/usr/lib/X11 -DSVR4
 
-# For Interactive Unix System machines 
-# you'll want to modify add the following options to the end of the 
-# LIBS definition (below) (or so I'm told)
-#     -lnsl_s -linet -lgen
+# For Interactive/SunSoft Unix ISC 4.0  (whatever *that* is!)
+#MCHN = -DSVR4 -DBSDTYPES
 
 
 #----------'Roll Your Own' Options----------
@@ -233,6 +242,7 @@ install: all
 	cp docs/bggen.man  $(MANDIR)/bggen.$(MANSUF)
 	cp docs/xcmap.man  $(MANDIR)/xcmap.$(MANSUF)
 	cp docs/xvp2p.man  $(MANDIR)/xvpictoppm.$(MANSUF)
+	cp docs/vdcomp.man $(MANDIR)/vdcomp.$(MANSUF)
 	cp docs/xvdocs.ps* $(LIBDIR)
 
 tar:

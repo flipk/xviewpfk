@@ -254,7 +254,7 @@ int LoadGIF(fname, pinfo)
 
 
 	if (cmtlen>0) {   /* build into one un-blocked comment */
-	  cmt = (byte *) malloc((size_t) cmtlen);
+	  cmt = (byte *) malloc((size_t) (cmtlen + 1));
 	  if (!cmt) gifWarning("couldn't malloc space for comments\n");
 	  else {
 	    sp = cmt;
@@ -262,15 +262,17 @@ int LoadGIF(fname, pinfo)
 	      sbsize = (*ptr1++);
 	      for (j=0; j<sbsize; j++, sp++, ptr1++) *sp = *ptr1;
 	    } while (sbsize);
+	    *sp = '\0';
 
 	    if (pinfo->comment) {    /* have to strcat onto old comments */
-	      cmt1 = (byte *) malloc(strlen(pinfo->comment) + cmtlen);
+	      cmt1 = (byte *) malloc(strlen(pinfo->comment) + cmtlen + 2);
 	      if (!cmt1) {
 		gifWarning("couldn't malloc space for comments\n");
 		free(cmt);
 	      }
 	      else {
 		strcpy((char *) cmt1, (char *) pinfo->comment);
+		strcat((char *) cmt1, (char *) "\n");
 		strcat((char *) cmt1, (char *) cmt);
 		free(pinfo->comment);
 		free(cmt);

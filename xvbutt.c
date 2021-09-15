@@ -961,7 +961,7 @@ void MBRedraw(mb)
 
     /* truncate at TAB, if any */
     strcpy(stbuf, str);
-    if ((str = index(stbuf, '\t')) != NULL) *str = '\0';
+    if ((str = (char *) index(stbuf, '\t')) != NULL) *str = '\0';
     str = stbuf;
 
     x1 = CENTERX(mfinfo, x + w/2, str);
@@ -1073,7 +1073,7 @@ int MBTrack(mb)
       char *sp, str[256];
 
       strcpy(str, mb->list[i]);
-      sp = index(str, '\t');
+      sp = (char *) index(str, '\t');
       j = StringWidth(sp+1);
       if (j>mtabwide) mtabwide = j;
 
@@ -1139,7 +1139,7 @@ int MBTrack(mb)
   for (i=0; i<mb->nlist; i++) {
     char txtstr[256], *tabstr;
     strcpy(txtstr, mb->list[i]);
-    if ((tabstr = index(txtstr, '\t'))) {
+    if ((tabstr = (char *) index(txtstr, '\t'))) {
       *tabstr = '\0';  tabstr++;
     }
 

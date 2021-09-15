@@ -20,7 +20,7 @@
 #define NEEDSDIR
 #include "xv.h"
 
-#ifdef VMS
+#if defined(VMS) || defined(isc)
 typedef unsigned int mode_t;  /* file mode bits */
 #endif
 
@@ -2579,7 +2579,7 @@ static int cdBrow(br)
   int rv;
 
   /* temporarily excise trailing '/' char from br->path */
-  if (strlen(br->path)>2 && br->path[strlen(br->path)-1] == '/')
+  if ((strlen(br->path) > (size_t) 2) && br->path[strlen(br->path)-1] == '/')
     br->path[strlen(br->path)-1] = '\0';
 
   rv = chdir(br->path);
@@ -3544,7 +3544,7 @@ static void genIcon(br, bf)
   case RFT_PBM:      if (xv_strstr(pinfo.fullInfo, "raw")) strcat(str,"Raw ");
                      else strcat(str,"Ascii ");
     
-                     for (i=0; i<3 && strlen(pinfo.fullInfo)>3; i++) {
+                     for (i=0; i<3 && (strlen(pinfo.fullInfo)>(size_t)3); i++){
 		       str1[0] = pinfo.fullInfo[i];  str1[1] = '\0';
 		       strcat(str, str1);
 		     }
@@ -4521,7 +4521,7 @@ static void rm_file(br, name)
 
   /* try to delete a thumbnail file, as well.  ignore errors */
   strcpy(buf1, name);          /* tmp1 = leading path of name */
-  tmp = rindex(buf1, '/');
+  tmp = (char *) rindex(buf1, '/');
   if (!tmp) strcpy(buf1,".");
   else *tmp = '\0';
   

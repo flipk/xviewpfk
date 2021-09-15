@@ -675,6 +675,8 @@ static int doAutoCrop24()
 # define inabsrange(a,n) ( (a) < n && (a) > -n )
   
 
+  if (cHIGH<3 || cWIDE<3) return 0;
+
   ctop = cbot = cleft = cright = 0;
 
   if (picType != PIC24) FatalError("doAutoCrop24 called when pic!=PIC24");
@@ -780,8 +782,11 @@ static int doAutoCrop24()
 
   /* do the actual cropping */
   if (cleft || ctop || cbot || cright) {
+    if (cWIDE - (cleft + cright) < 1 ||
+	cHIGH - (ctop  + cbot  ) < 1) return 0;    /* sanity check */
+    
     DoCrop(cXOFF+cleft, cYOFF+ctop, 
-	    cWIDE-(cleft+cright), cHIGH-(ctop+cbot));
+	   cWIDE-(cleft+cright), cHIGH-(ctop+cbot));
     return 1;
   }
 
@@ -859,7 +864,7 @@ void DoCrop(x,y,w,h)
   eWIDE = (int) (cWIDE * expw);  
   eHIGH = (int) (cHIGH * exph);
 
-  if (eWIDE > maxWIDE || h > maxHIGH) {  /* make 'normal' size */
+  if (eWIDE>maxWIDE || eHIGH>maxHIGH) {  /* make 'normal' size */
     if (cWIDE>maxWIDE || cHIGH>maxHIGH) {
       double r,wr,hr;
       wr = ((double) cWIDE) / maxWIDE;
@@ -872,6 +877,9 @@ void DoCrop(x,y,w,h)
     else { eWIDE = cWIDE;  eHIGH = cHIGH; }
   }
 
+
+  if (eWIDE<1) eWIDE = 1;
+  if (eHIGH<1) eHIGH = 1;
 
   SetCursors(-1);
 }
@@ -2823,9 +2831,9 @@ static int doPadPaste(pic24, wide, high, opaque,omode)
 	  }
 	  
 	  if (omode == PAD_ORGB) {
-	    rval = (r * fg) / 100 + (p24[0] * bg) / 100;
-	    gval = (g * fg) / 100 + (p24[1] * bg) / 100;
-	    bval = (b * fg) / 100 + (p24[2] * bg) / 100;
+	    rval = (r * fg) / 100 + ((int) p24[0] * bg) / 100;
+	    gval = (g * fg) / 100 + ((int) p24[1] * bg) / 100;
+	    bval = (b * fg) / 100 + ((int) p24[2] * bg) / 100;
 	  }
 	  else {       /* one of the HSV modes */
 	    double fh,fs,fv,fw, bh,bs,bv,bw, h,s,v;

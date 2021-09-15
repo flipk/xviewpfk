@@ -8,14 +8,14 @@
 #include "config.h"
 
 
-#define REVDATE   "Version 3.10  Rev: 12/16/94"
-#define VERSTR    "3.10"
+#define REVDATE   "Version 3.10a  Rev: 12/29/94"
+#define VERSTR    "3.10a"
 
 /*
  * uncomment the following, and modify for your site, but only if you've
  * actually registered your copy of XV...
  */
-#define REGSTR "Registered for use at the University of Illinois at Urbana."
+/* #define REGSTR "Registered for use at the University of Pennsylvania." */
 
 
 #ifndef VMS
@@ -59,6 +59,13 @@
 #ifdef sgi         /* SGI machines (SVR4) */
 #  undef  SVR4
 #  define SVR4
+#endif
+
+
+#ifdef LINUX
+#  ifndef _LINUX_LIMITS_H
+#    include <linux/limits.h>
+#  endif
 #endif
 
 
@@ -108,7 +115,7 @@
 #ifndef VMS
 #  include <errno.h>
    extern int   errno;             /* SHOULD be in errno.h, but often isn't */
-#  if !defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__FreeBSD__)
+#  ifndef __NetBSD__
      extern char *sys_errlist[];     /* this too... */
 #  endif
 #endif
@@ -155,7 +162,9 @@
      !defined(sequent)
 
 #  if defined(hp300) || defined(hp800) || defined(NeXT)
+#   include <sys/malloc.h>                /* it's in 'sys' on HPs and NeXT */
 #  else
+#   include <malloc.h>
 #  endif
 # endif
 #endif /* !VMS */
@@ -196,6 +205,13 @@
 #    include <limits.h>
 #  endif
 
+/*** for select() call ***/
+#  ifdef __hpux
+#    define XV_FDTYPE (int *)
+#  else
+#    define XV_FDTYPE (fd_set *)
+#  endif
+
 #endif  /* NEEDSTIME */
 
 
@@ -210,6 +226,10 @@
 #      include <sys/dir.h>
 #    else
 #      include <dirent.h>
+#    endif
+
+#    if defined(SVR4) || defined(SYSV)
+#      include <fcntl.h>
 #    endif
 
 #    include <sys/param.h>
@@ -959,6 +979,7 @@ WHERE int           p_offx, p_offy;  /* offset of reparented windows */
 WHERE int           ch_offx,ch_offy; /* ChngAttr ofst for reparented windows */
 WHERE int           kludge_offx,     /* WM kludges for SetWindowPos routine */ 
                     kludge_offy;
+WHERE int           winCtrPosKludge; /* kludge for popup positioning... */
 
 WHERE int            ignoreConfigs;  /* an evil kludge... */
 
@@ -1034,7 +1055,7 @@ WHERE float         defaspect,     /* default aspect ratio to use */
                     normaspect;    /* normal aspect ratio of this picture */
 
 WHERE unsigned long rootbg, rootfg;   /* fg/bg for root border */
-WHERE float         waitsec;          /* secs btwn pics. -1=wait for event */
+WHERE int           waitsec;          /* secs btwn pics. -1=wait for event */
 WHERE int           waitloop;         /* loop at end of slide show? */
 WHERE int           automax;          /* maximize pic on open */
 WHERE int           rootMode;         /* mode used for -root images */

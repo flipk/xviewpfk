@@ -70,7 +70,7 @@ static int WriteTIFF(fp,pic,ptype,w,h,rmap,gmap,bmap,numcols,colorstyle,
   TIFFSetField(tif, TIFFTAG_IMAGELENGTH, h);
   TIFFSetField(tif, TIFFTAG_COMPRESSION, comp);
 
-  if (comment && strlen(comment)>0) {
+  if (comment && strlen(comment) > (size_t) 0) {
     TIFFSetField(tif, TIFFTAG_IMAGEDESCRIPTION, comment);
   }
 

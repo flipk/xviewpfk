@@ -370,7 +370,7 @@ Fax3Decode(TIFF* tif, tidata_t buf, tsize_t occ, tsample_t s)
  * Decode a code and return the associated run length.
  */
 static int32
-decode_run(TIFF* tif, const u_short fsm[][256])
+decode_run(TIFF* tif, /*const*/ u_short fsm[][256])
 {
 	Fax3DecodeState *sp = (Fax3DecodeState *)tif->tif_data;
 	int state = sp->b.bit;

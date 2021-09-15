@@ -1,4 +1,3 @@
-#define const
 /* "$Header: /usr/people/sam/tiff/libtiff/RCS/mkg3states.c,v 1.23 1994/09/29 17:13:36 sam Exp $ */
 
 /*

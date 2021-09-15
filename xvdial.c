@@ -358,7 +358,7 @@ DIAL *dp;
 
   if (dp->units) strcat(foo,dp->units);
   foo1[0] = '\0';
-  if (strlen(foo)<i) {
+  if (strlen(foo) < (size_t) i) {
     for (i = i - strlen(foo); i>0; i--) strcat(foo1," ");
   }
   strcat(foo1, foo);

@@ -120,7 +120,7 @@ int LoadTIFF(fname, pinfo)
   desc = (char *) NULL;
 
   TIFFGetField(tif, TIFFTAG_IMAGEDESCRIPTION, &desc);
-  if (desc && strlen(desc)>0) {
+  if (desc && strlen(desc) > (size_t) 0) {
     /* kludge:  tiff library seems to return bizarre comments */
     if (strlen(desc)==4 && strcmp(desc, "\367\377\353\370")==0) {} 
     else {
@@ -1381,8 +1381,7 @@ static void putRGBseparate16bittile(cp, r, g, b, Map, w, h, fromskew, toskew)
   }
 }
 
-/* #define Code2V(c, RB, RW, CR)  ((((c)-(int)RB)*(float)CR)/(float)(RW-RB)) */
-#define Code2V(c, RB, RW, CR)     ((((c)-RB)*(float)CR)/(float)(RW-RB))
+#define Code2V(c, RB, RW, CR)  ((((c)-(int)RB)*(float)CR)/(float)(RW-RB))
 
 #define	CLAMP(f,min,max) \
     (int)((f)+.5 < (min) ? (min) : (f)+.5 > (max) ? (max) : (f)+.5)

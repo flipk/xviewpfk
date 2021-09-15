@@ -616,7 +616,7 @@ static void allocRWColors()
 	    *foo = "No r/w cells available.  Using r/o color.";
 
 	tmp = GetISTR(ISTR_WARNING);
-	if (strlen(tmp)>0) sprintf(tstr, "%s  %s", tmp, foo);
+	if (strlen(tmp) > (size_t) 0) sprintf(tstr, "%s  %s", tmp, foo);
 	else sprintf(tstr, "%s", foo);
 	SetISTR(ISTR_WARNING,tstr);
 
@@ -790,10 +790,10 @@ Status xvAllocColor(dp, cm, cdef)
 }
 
 
-void xvFreeColors(dp, cm,pixels, npixels, planes)
+void xvFreeColors(dp, cm, pixels, npixels, planes)
      Display *dp;
      Colormap cm;
-     unsigned long pixels[];
+     unsigned long *pixels;
      int npixels;
      unsigned long planes;
 {
