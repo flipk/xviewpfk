@@ -1,0 +1,187 @@
+Patch to get XV to compile under BeOS
+By David Powell (david@mad.scientist.com)
+
+
+
+diff -cr ../xv-3.10a.dist/Makefile ./Makefile
+*** ../xv-3.10a.dist/Makefile	Mon Jan 23 15:20:54 1995
+--- ./Makefile	Wed Nov 10 11:02:36 1999
+***************
+*** 1,4 ****
+! # Makefile for xv
+  
+  # your C compiler (and options) of choice
+  CC = cc
+--- 1,4 ----
+! # BeOS Makefile for xv
+  
+  # your C compiler (and options) of choice
+  CC = cc
+***************
+*** 14,20 ****
+  #       -Wuninitialized -Wparentheses
+  
+  
+! CCOPTS = -O 
+  
+  
+  ### NOTE: Sun running OpenWindows:
+--- 14,20 ----
+  #       -Wuninitialized -Wparentheses
+  
+  
+! CCOPTS = -O -I/usr/X11/include -L/usr/X11/lib
+  
+  
+  ### NOTE: Sun running OpenWindows:
+***************
+*** 84,89 ****
+--- 84,92 ----
+  
+  #----------Machine Specific Configurations----------
+  
++ ### If you are using a BeOS system, uncomment the following line
++ MCHN = -DUSE_GETCWD
++ 
+  ### If you are using an SGI system, uncomment the following line
+  #MCHN = -Dsgi
+  
+***************
+*** 188,194 ****
+  	$(NODIRENT) $(VPRINTF) $(TIMERS) $(UNIX) $(BSDTYPES) $(RAND) \
+  	$(DXWM) $(MCHN)
+  
+! LIBS = -lX11 $(JPEGLIB) $(TIFFLIB) -lm
+  
+  OBJS = 	xv.o xvevent.o xvroot.o xvmisc.o xvimage.o xvcolor.o xvsmooth.o \
+  	xv24to8.o xvgif.o xvpm.o xvinfo.o xvctrl.o xvscrl.o xvalg.o \
+--- 191,198 ----
+  	$(NODIRENT) $(VPRINTF) $(TIMERS) $(UNIX) $(BSDTYPES) $(RAND) \
+  	$(DXWM) $(MCHN)
+  
+! ### -lm removed for BeOS
+! LIBS = -lX11 $(JPEGLIB) $(TIFFLIB)
+  
+  OBJS = 	xv.o xvevent.o xvroot.o xvmisc.o xvimage.o xvcolor.o xvsmooth.o \
+  	xv24to8.o xvgif.o xvpm.o xvinfo.o xvctrl.o xvscrl.o xvalg.o \
+
+
+diff -cr ../xv-3.10a.dist/cleandir ./cleandir
+*** ../xv-3.10a.dist/cleandir	Thu Dec 22 17:34:50 1994
+--- ./cleandir	Wed Nov 10 11:03:38 1999
+***************
+*** 1,9 ****
+! #!/bin/csh -f
+  # cleandir: if called with an argument, cd's there and does a 'make clean'
+  #
+  
+! if ( x$1 != x ) then
+    echo "cleaning $1 subdirectory"
+    cd $1
+    make clean
+! endif
+--- 1,9 ----
+! #!/bin/sh
+  # cleandir: if called with an argument, cd's there and does a 'make clean'
+  #
+  
+! #if ( x$1 != x ) then
+    echo "cleaning $1 subdirectory"
+    cd $1
+    make clean
+! #fi
+
+
+diff -cr ../xv-3.10a.dist/tiff/RANLIB.csh ./tiff/RANLIB.csh
+*** ../xv-3.10a.dist/tiff/RANLIB.csh	Thu Dec 22 17:35:17 1994
+--- ./tiff/RANLIB.csh	Wed Nov 10 11:05:21 1999
+***************
+*** 1,4 ****
+! #!/bin/csh -f
+  #
+  # tests to see if the program 'ranlib' exists.  If it does, runs ranlib on
+  # the first argument (a library name).  Otherwise, does nothing, and returns
+--- 1,4 ----
+! #!/bin/sh
+  #
+  # tests to see if the program 'ranlib' exists.  If it does, runs ranlib on
+  # the first argument (a library name).  Otherwise, does nothing, and returns
+***************
+*** 9,22 ****
+  
+  echo "executing 'ranlib $1'..."
+  
+! # Is there a ranlib?  Let's try and then suffer the consequences...
+! set haveranlib = `ranlib $1 >& /dev/null`
+! 
+! if ( $status ) then 
+! 	echo "There doesn't seem to be a ranlib on this system..."
+! 	echo "Don't worry about it."
+! endif
+  
+! echo ""
+! echo ""
+  
+--- 9,26 ----
+  
+  echo "executing 'ranlib $1'..."
+  
+! #beos added
+! ranlib $1
+  
+! #beos removed
+! # Is there a ranlib?  Let's try and then suffer the consequences...
+! #set haveranlib = `ranlib $1 >& /dev/null`
+! #
+! #if ( $status ) then
+! #	echo "There doesn't seem to be a ranlib on this system..."
+! #	echo "Don't worry about it."
+! #endif
+! #
+! #echo ""
+! #echo ""
+  
+
+diff -cr ../xv-3.10a.dist/xv.h ./xv.h
+*** ../xv-3.10a.dist/xv.h	Mon Jan 23 15:22:23 1995
+--- ./xv.h	Wed Nov 10 11:10:49 1999
+***************
+*** 122,131 ****
+  
+  
+  /* not everyone has the strerror() function, or so I'm told */
+! #ifndef VMS
+! #  define ERRSTR(x) sys_errlist[x]
+! #else
+  #  define ERRSTR(x) strerror(x, vaxc$errno)
+  #endif
+  
+  
+--- 122,135 ----
+  
+  
+  /* not everyone has the strerror() function, or so I'm told */
+! #ifdef VMS
+  #  define ERRSTR(x) strerror(x, vaxc$errno)
++ #else
++ #  ifdef __BEOS__
++ #    define ERRSTR(x) strerror(x)
++ #  else
++ #    define ERRSTR(x) sys_errlist[x]
++ #  endif
+  #endif
+  
+  
+***************
+*** 203,208 ****
+--- 207,216 ----
+  
+  #  ifdef sgi               /* need 'CLK_TCK' value for sginap() call */
+  #    include <limits.h>
++ #  endif
++ 
++ #  ifdef __BEOS__
++ #    include <socket.h>
+  #  endif
+  
+  /*** for select() call ***/
