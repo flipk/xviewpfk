@@ -1,176 +1,35 @@
-/*
- *  xv.h  -  header file for xv, but you probably guessed as much
- * 
- *  Author:    John Bradley  (bradley@cis.upenn.edu)
- */
 
-#include "copyright.h"
 #include "config.h"
 
+#define REVDATE   "Version 3.10a-pfk  Rev: Jan 27 2025"
+#define PROGNAME  "xv"
+#define VERSTR    "3.10a-pfk"
 
-#define REVDATE   "Version 3.10a  Rev: 12/29/94"
-#define VERSTR    "3.10a"
+#define THUMBDIR     ".xvpics"  /* name of thumbnail file subdirectories */
+#define THUMBDIRNAME ".xvpics"  /* same as THUMBDIR, unlike VMS case... */
+#define CLIPFILE     ".xvclip"  /* name of clipboard file in home directory */
 
-/*
- * uncomment the following, and modify for your site, but only if you've
- * actually registered your copy of XV...
- */
-/* #define REGSTR "Registered for use at the University of Pennsylvania." */
+// this hasn't been needed in like a million years.
+#define PARM(a) a
 
-
-#ifndef VMS
-#  define THUMBDIR     ".xvpics"  /* name of thumbnail file subdirectories */
-#  define THUMBDIRNAME ".xvpics"  /* same as THUMBDIR, unlike VMS case... */
-#  define CLIPFILE     ".xvclip"  /* name of clipboard file in home directory */
-#else
-#  define THUMBDIR     "XVPICS"       /* name to use in building paths... */
-#  define THUMBDIRNAME "XVPICS.DIR"   /* name from readdir() & stat() */
-#  define CLIPFILE     "xvclipbd.dat"
-#endif
-
-
-#undef PARM
-#ifdef __STDC__
-#  define PARM(a) a
-#else
-#  define PARM(a) ()
-#  define const
-#endif
-
-
-
-/*************************************************/
-/* START OF MACHINE-DEPENDENT CONFIGURATION INFO */
-/*************************************************/
-
-/* Things to make xv more likely to just build, without the user tweaking
-   the makefile */
-
-#ifdef hpux        /* HPUX machines (SVR3, (not SVR4) NO_RANDOM) */
-#  undef  SVR4
-#  undef  SYSV
-#  define SYSV
-#  undef  NO_RANDOM
-#  define NO_RANDOM
-#  define USE_GETCWD
-#endif
-
-
-#ifdef sgi         /* SGI machines (SVR4) */
-#  undef  SVR4
-#  define SVR4
-#endif
-
-
-#ifdef LINUX
-#  ifndef _LINUX_LIMITS_H
-#    include <linux/limits.h>
-#  endif
-#endif
-
-
-#include <X11/Xos.h>     /* need type declarations immediately */
-
-/*********************************************************/
-
-
-/* The BSD typedefs are used throughout.
- * If your system doesn't have them in <sys/types.h>,
- * then define BSDTYPES in your Makefile.
- */
-#if defined(BSDTYPES) || defined(VMS)
-  typedef unsigned char  u_char;
-  typedef unsigned short u_short;
-  typedef unsigned int   u_int;
-  typedef unsigned long  u_long;
-#endif
-
-
-#ifdef __UMAXV__              /* for Encore Computers UMAXV */
-#  include <sys/fs/b4param.h>   /* Get bsd fast file system params*/
-#endif
-
-
-/* things that *DON'T* have dirent.  Hopefully a very short list */
-#if defined(__UMAXV__)
-#  ifndef NODIRENT
-#    define NODIRENT
-#  endif
-#endif
-
-
-/* include files */
+#include <limits.h>
+#include <sys/types.h>
+#include <signal.h>
 #include <stdio.h>
 #include <math.h>
 #include <ctype.h>
-
-#ifdef __STDC__
-#  include <stddef.h>
-#  include <stdlib.h>
-#endif
-
-/* note: 'string.h' or 'strings.h' is included by Xos.h, and it
-   guarantees index() and rindex() will be available */
-
-#ifndef VMS
-#  include <errno.h>
-   extern int   errno;             /* SHOULD be in errno.h, but often isn't */
-#  ifndef __NetBSD__
-     extern char *sys_errlist[];     /* this too... */
-#  endif
-#endif
-
-
-/* not everyone has the strerror() function, or so I'm told */
-#ifndef VMS
-#  define ERRSTR(x) sys_errlist[x]
-#else
-#  define ERRSTR(x) strerror(x, vaxc$errno)
-#endif
-
-
-
-
-#ifdef VMS   /* VMS config, hacks & kludges */
-#  define MAXPATHLEN    512
-#  define popUp xv_popup
-#  define qsort xv_qsort
-#  define random rand
-#  define srandom srand
-#  define cols xv_cols
-#  define gmap xv_gmap
-#  define index  strchr
-#  define rindex strrchr
-#  include <errno.h>
-#  include <perror.h>
-#endif
-
-
-/* lots of things don't have <malloc.h> */
-/* A/UX systems include it from stdlib, from Xos.h */
-#ifndef VMS   /* VMS hates multi-line '#if's */
-# if !defined(ibm032)                    && \
-     !defined(__convex__)                && \
-     !(defined(vax) && !defined(ultrix)) && \
-     !defined(mips)                      && \
-     !defined(apollo)                    && \
-     !defined(pyr)                       && \
-     !defined(__UMAXV__)                 && \
-     !defined(bsd43)                     && \
-     !defined(aux)                       && \
-     !defined(__bsdi__)                  && \
-     !defined(sequent)
-
-#  if defined(hp300) || defined(hp800) || defined(NeXT)
-#   include <sys/malloc.h>                /* it's in 'sys' on HPs and NeXT */
-#  else
-#   include <malloc.h>
-#  endif
-# endif
-#endif /* !VMS */
-
-
-
+#include <stddef.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/time.h>
+#include <sys/select.h>
+#include <dirent.h>
+#include <fcntl.h>
+#include <sys/param.h>
+#include <sys/stat.h>
+#include <stdarg.h>
+#include <X11/Xos.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/cursorfont.h>
@@ -179,161 +38,17 @@
 #include <X11/Xatom.h>
 #include <X11/Xmd.h>
 
+typedef unsigned char  u_char;
+typedef unsigned short u_short;
+typedef unsigned int   u_int;
+typedef unsigned long  u_long;
 
-#undef SIGCHLD           /* defined in both Xos.h and signal.h */
-#include <signal.h>      /* for interrupt handling */
+#define ERRSTR(x) strerror(x)
+#define XV_FDTYPE (fd_set *)
 
-#include <sys/types.h>
-
-
-
-
-
-
-#ifdef NEEDSTIME
-#  include <sys/time.h>
-
-#  ifdef _AIX
-#    include <sys/select.h>   /* needed for select() call in Timer() */
-#  endif
-
-#  ifdef SVR4
-#    include <poll.h>      /* used in SVR4 version of Timer() */
-#  endif
-
-#  ifdef sgi               /* need 'CLK_TCK' value for sginap() call */
-#    include <limits.h>
-#  endif
-
-/*** for select() call ***/
-#  ifdef __hpux
-#    define XV_FDTYPE (int *)
-#  else
-#    define XV_FDTYPE (fd_set *)
-#  endif
-
-#endif  /* NEEDSTIME */
-
-
-
-#ifdef NEEDSDIR
-#  ifdef VMS
-#    include <descrip.h>
-#    include <stat.h>
-#    include "dirent.h"
-#  else
-#    ifdef NODIRENT
-#      include <sys/dir.h>
-#    else
-#      include <dirent.h>
-#    endif
-
-#    if defined(SVR4) || defined(SYSV)
-#      include <fcntl.h>
-#    endif
-
-#    include <sys/param.h>
-#    include <sys/stat.h>
-
-#    if defined(__convex__) && defined (__STDC__)
-#      define S_IFMT  _S_IFMT
-#      define S_IFDIR _S_IFDIR
-#      define S_IFCHR _S_IFCHR
-#      define S_IFBLK _S_IFBLK
-#    endif
-#  endif
-#endif
-
-
-#ifdef NEEDSARGS
-#  if defined(__STDC__) && !defined(NOSTDHDRS)
-#    include <stdarg.h>
-#  else
-#    include <varargs.h>
-#  endif
-#endif
-
-
-
-/* Use S_ISxxx macros in stat-related stuff
- * make them if missing, along with a few fictitious ones
- *      Cameron Simpson  (cameron@cse.unsw.edu.au)
- */
- 
-#ifndef         S_ISDIR         /* missing POSIX-type macros */
-#  define       S_ISDIR(mode)   (((mode)&S_IFMT) == S_IFDIR)
-#  define       S_ISBLK(mode)   (((mode)&S_IFMT) == S_IFBLK)
-#  define       S_ISCHR(mode)   (((mode)&S_IFMT) == S_IFCHR)
-#  define       S_ISREG(mode)   (((mode)&S_IFMT) == S_IFREG)
-#endif
-#ifndef         S_ISFIFO
-#  ifdef        S_IFIFO
-#    define     S_ISFIFO(mode)  (((mode)&S_IFMT) == S_IFIFO)
-#  else
-#    define     S_ISFIFO(mode)  0
-#  endif
-#endif
-#ifndef         S_ISLINK
-#  ifdef        S_IFLNK
-#    define     S_ISLINK(mode)  (((mode)&S_IFMT) == S_IFLNK)
-#  else
-#    define     S_ISLINK(mode)  0
-#  endif
-#endif
-#ifndef         S_ISSOCK
-#  ifdef        S_IFSOCK
-#    define     S_ISSOCK(mode)  (((mode)&S_IFMT) == S_IFSOCK)
-#  else
-#    define     S_ISSOCK(mode)  0
-#  endif
-#endif
-
-
-
-#ifndef MAXPATHLEN
-#  define MAXPATHLEN 256
-#endif
-
-
-#ifdef SVR4
-#  define random lrand48
-#  define srandom srand48
-#else
-#  if defined(NO_RANDOM) || (defined(sun) && defined(SYSV))
-#    define random()   rand()
-#    define srandom(x) srand(x)
-#  endif
-#endif
-
-
-#ifndef VMS       /* VMS hates multi-line definitions */
-#  if defined(SVR4)  || defined(SYSV) || defined(sco) || \
-      defined(XENIX) || defined(__osf__) 
-#    undef  USE_GETCWD
-#    define USE_GETCWD          /* use 'getcwd()' instead of 'getwd()' */
-#  endif
-#endif
-
-
-/*****************************/
-/* END OF CONFIGURATION INFO */
-/*****************************/
-
-#ifdef DOJPEG
-#define HAVE_JPEG
-#endif
-
-#ifdef DOTIFF
-#define HAVE_TIFF
-#endif
-
-#ifdef DOPDS
-#define HAVE_PDS
-#endif
-
-
-
-#define PROGNAME  "xv"             /* used in resource database */
+#define HAVE_JPEG 1
+#define HAVE_TIFF 1
+#define HAVE_PDS  1
 
 #define MAXNAMES 4096              /* max # of files in ctrlW list */
 
@@ -446,18 +161,8 @@
    duplicate cases if JPGINC or TIFINC = 0.  All code that references
    F_JPEG or F_TIFF is #ifdef'd, so it won't be a problem */
 
-#ifdef HAVE_JPEG
 #define F_JPGINC  1
-#else
-#define F_JPGINC  0
-#endif
-
-#ifdef HAVE_TIFF
 #define F_TIFINC  1
-#else
-#define F_TIFINC  0
-#endif
-
 
 #define F_GIF         0
 #define F_JPEG      ( 0 + F_JPGINC)
@@ -734,6 +439,10 @@
 #define STDINSTR "<stdin>"
 
 
+// so, this is gross. if main.c includes this file,
+// all these WHERE things are defined.
+// if any other .c file includes this file,
+// all these WHERE things are extern'd.
 #ifndef MAIN
 #define WHERE extern
 #else
@@ -1356,11 +1065,7 @@ void  RedrawInfo           PARM((int, int, int, int));
 void  SetInfoMode          PARM((int));
 char *GetISTR              PARM((int));
 
-#if defined(__STDC__) && !defined(NOSTDHDRS)
-void  SetISTR(int, ...);
-#else
-void  SetISTR();
-#endif
+void  SetISTR            (int, ...);
 
 
 /**************************** XVDIR.C ***************************/

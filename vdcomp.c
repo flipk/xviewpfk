@@ -432,7 +432,7 @@ int host;
 
   if (inname[0] == ' ') {
     printf("\nEnter name of file to be decompressed: ");
-    gets (inname);
+    fgets (inname, sizeof(inname), stdin);
   }
 
   if (host == 1 | host == 2) {
@@ -474,13 +474,13 @@ int host;
       printf("\n  3.  VICAR format.");
       printf("\n  4.  Unlabelled binary array.\n");
       printf("\n  Enter format number:");
-      gets(inname);
+      fgets(inname, sizeof(inname), stdin);
       output_format = atoi(inname);
     } while (output_format < 1 || output_format > 4);
 
   if (outname[0] == ' ') {
     printf("\nEnter name of uncompressed output file: ");
-    gets (outname);
+    fgets (outname, sizeof(outname), stdin);
   }
 
   return(host);

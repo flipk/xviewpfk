@@ -89,7 +89,7 @@ void RedrawInfo(x,y,w,h)
   sprintf(str,"XV   -   %s",REVDATE);
   CenterString(infoW, INFOWIDE/2, 36-LINEHIGH, str);
   CenterString(infoW, INFOWIDE/2, 36,
-	       "by John Bradley  (bradley@dccs.upenn.edu)");
+	       "by John Bradley  (bradley@dccs.upenn.edu), updates by pfk@pfk.org");
   CenterString(infoW, INFOWIDE/2, 36+LINEHIGH, 
 	       "Copyright 1994, John Bradley  -  All Rights Reserved");
 

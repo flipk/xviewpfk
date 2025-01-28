@@ -1,0 +1,7 @@
+*.o
+*.a
+xv
+bggen
+vdcomp
+xcmap
+xvpictoppm

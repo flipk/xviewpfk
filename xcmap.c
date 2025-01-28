@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <ctype.h>
+#include <stdlib.h>
 
 #include <X11/Xos.h>
 #include <X11/Xlib.h>

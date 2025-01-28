@@ -745,7 +745,7 @@ void LoadCurrentDirectory()
         if      (S_ISDIR(ftype))  fnames[i][0] = C_DIR;
         else if (S_ISCHR(ftype))  fnames[i][0] = C_CHR;
         else if (S_ISBLK(ftype))  fnames[i][0] = C_BLK;
-	else if (S_ISLINK(ftype)) fnames[i][0] = C_LNK;
+	else if (S_ISLNK(ftype))  fnames[i][0] = C_LNK;
 	else if (S_ISFIFO(ftype)) fnames[i][0] = C_FIFO;
 	else if (S_ISSOCK(ftype)) fnames[i][0] = C_SOCK;
         else if (fnames[i][0] == C_REG && (mode&0111)) fnames[i][0] = C_EXE;

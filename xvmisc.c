@@ -991,11 +991,7 @@ void xv_getwd(buf, buflen)
 
   char *rv; 
 
-#ifdef USE_GETCWD
   rv = (char *) getcwd(buf, buflen);
-#else
-  rv = (char *) getwd(buf);
-#endif
 
   if (!rv || strlen(rv)==0) {
     if (((rv=(char *) getenv("PWD"))==NULL) && 

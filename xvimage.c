@@ -1714,10 +1714,11 @@ XImage *Pic8ToXImage(pic8, wide, high, xcolors, rmap, gmap, bmap)
   case 12:
   case 15:
   case 16: {
-    unsigned short  *imagedata, *ip;
+    unsigned char * ip;
+    unsigned char * imagedata;
     byte  *pp;
 
-    imagedata = (unsigned short *) malloc((size_t) (2*wide*high));
+    imagedata = (unsigned char *) malloc((size_t) (2*wide*high));
     if (!imagedata) FatalError("couldn't malloc imagedata");
 
     xim = XCreateImage(theDisp,theVisual,dispDEEP,ZPixmap,0,
@@ -1740,8 +1741,8 @@ XImage *Pic8ToXImage(pic8, wide, high, xcolors, rmap, gmap, bmap)
 	if (dithpic) xcol = ((*pp) ? white : black) & 0xffff;
 		else xcol = xcolors[*pp] & 0xffff;
 
-	*((unsigned char *)ip)++ = (xcol>>8) & 0xff;
-	*((unsigned char *)ip)++ = (xcol) & 0xff;
+	*ip++ = (xcol>>8) & 0xff;
+	*ip++ = (xcol) & 0xff;
       }
     }
     else {   /* LSBFirst */
@@ -1751,8 +1752,8 @@ XImage *Pic8ToXImage(pic8, wide, high, xcolors, rmap, gmap, bmap)
 	if (dithpic) xcol = ((*pp) ? white : black) & 0xffff;
 	        else xcol = xcolors[*pp];
 
-	*((unsigned char *)ip)++ = (xcol) & 0xff;
-	*((unsigned char *)ip)++ = (xcol>>8) & 0xff;
+	*ip++ = (xcol) & 0xff;
+	*ip++ = (xcol>>8) & 0xff;
       }
     }
   }

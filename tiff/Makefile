@@ -31,11 +31,11 @@ MAKE= make -${MAKEFLAGS}
 #
 
 AR=     ar
-RANLIB=	./RANLIB.csh
+RANLIB=	ranlib
 
 IPATH= -I.
 
-COPTS=	-O
+COPTS=	-O2
 CFLAGS=	${COPTS} ${IPATH}
 
 INCS=	tiff.h tiffio.h
@@ -72,4 +72,3 @@ g3states.h:	mkg3states.c t4.h
 
 clean:
 	rm -f ${ALL} ${OBJS} core a.out mkg3states g3states.h
- 

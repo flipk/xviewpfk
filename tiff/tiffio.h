@@ -61,14 +61,10 @@ typedef	uint16 tsample_t;	/* sample number */
 typedef	uint32 tstrip_t;	/* strip number */
 typedef uint32 ttile_t;		/* tile number */
 typedef	int32 tsize_t;		/* i/o size in bytes */
-#ifdef _WINDOWS
-#include <windows.h>
-typedef	void __far* tdata_t;	/* image data ref */
-typedef	HFILE thandle_t;	/* client data handle */
-#else
+
 typedef	void* tdata_t;		/* image data ref */
-typedef	void* thandle_t;	/* client data handle */
-#endif
+typedef	int thandle_t;	/* client data handle */
+
 typedef	int32 toff_t;		/* file offset */
 
 #ifndef NULL

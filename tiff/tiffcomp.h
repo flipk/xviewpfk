@@ -99,12 +99,12 @@
  * If your system doesn't have them in <sys/types.h>,
  * then define BSDTYPES in your Makefile.
  */
-#ifdef BSDTYPES
+
 typedef	unsigned char u_char;
 typedef	unsigned short u_short;
 typedef	unsigned int u_int;
 typedef	unsigned long u_long;
-#endif
+
 
 /*
  * dblparam_t is the type that a double precision

@@ -122,11 +122,7 @@ void LoadDfltPic(pinfo)
   DrawStr2Pic(str, DWIDE/2, 241, dfltpic, DWIDE, DHIGH, 250);
 
 
-#ifdef REGSTR
-  strcpy(str,REGSTR);
-#else
-  strcpy(str,"UNREGISTERED COPY:  See 'About XV' for registration info.");
-#endif
+  strcpy(str,"UNREGISTERED COPY: PFK DIDN'T REGISTER THIS AND ISN'T GONNA");
 
   DrawStr2Pic(str, DWIDE/2+1, 258+1, dfltpic, DWIDE, DHIGH, 252);
   DrawStr2Pic(str, DWIDE/2, 258, dfltpic, DWIDE, DHIGH, 251);
